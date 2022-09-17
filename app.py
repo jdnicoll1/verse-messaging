@@ -18,12 +18,10 @@ def send_verse():
                 "Romans 8:32" : "He who did not spare His own Son, but delivered Him up for us all, how shall He not with Him also freely give us all things?"
     }
 
-    # account_sid = os.environ['TWILIO_ACCOUNT_SID']
-    # auth_token = os.environ['TWILIO_AUTH_TOKEN']
-    # messaging_service_sid = os.environ['TWILIO_MESSAGING_SERVICE_SID']
-    account_sid = "ACc52c9380b42e810d6ff243252f2b8e16"
-    auth_token = "8dcc67a6b28148becb3dd5e2dd79c8e3"
-    messaging_service_sid = "MGc6f93b9f425e4eb0b003b0ba39b69661"
+    account_sid = os.environ['TWILIO_ACCOUNT_SID']
+    auth_token = os.environ['TWILIO_AUTH_TOKEN']
+    messaging_service_sid = os.environ['TWILIO_MESSAGING_SERVICE_SID']
+    
 
     client = Client(account_sid, auth_token)
     verse_num = 1
