@@ -62,6 +62,7 @@ def sms_reply():
     #if verse_response - determine if we sent a verse and if it matches the response 
 
     # if STOP - stop sending messages 
+    # user_setup = setup.Setup_User("Jacob", "2")
     
 
     number = request.form['From']
@@ -71,7 +72,7 @@ def sms_reply():
         
     
     response_message = 'Hello {}, You said: {}'.format(number, message_body)
-    user_setup = setup.Setup_User("Jacob", "2")
+    
     resp.message(response_message)
 
     return str(resp)
