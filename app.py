@@ -8,7 +8,7 @@ sched = BlockingScheduler()
 app = Flask(__name__)
 
 
-@sched.scheduled_job('interval', minutes=60)
+@sched.scheduled_job('interval', minutes=2)
 def send_verse():
     verse_dict = {"2 Corinthians 5:21" : "For our sake he made him to be sin who knew no sin, so that in him we might become the righteousness of God", 
                 "1 Thessalonians 5:16-18" : "Rejoice always, pray without ceasing, give thanks in all circumstances; for this is the will of God in Christ Jesus for you.", 
