@@ -8,11 +8,14 @@ from flask_pymongo import PyMongo
 
 import setup
 
-sched = BlockingScheduler()
-mongo = PyMongo()
+#initialize flask application
 app = Flask(__name__)
 
-app.config['MONGO_URI'] = "mongodb+srv://jdnicoll1:mongo@cluster0.dj2jkov.mongodb.net/jacobdb?retryWrites=true&w=majority"
+#initialize scheduler for periodic texts
+sched = BlockingScheduler()
+
+#initialize database
+app.config['MONGO_URI'] = os.environ['MONGO_URI']
 mongo = PyMongo(app)
 verse_collection = mongo.db.messaging
 
@@ -55,26 +58,29 @@ def send_verse():
 @app.route('/', methods=['GET', 'POST'])
 def sms_reply(): 
 
+    #incoming message 
+    number = request.form['From']
+    message_body = request.form['Body']
+    resp = MessagingResponse()
+    
     #handle initial incoming message 
     #if(request.method == 'POST')
+    query_number = {"phone_number": number}
+    if(verse_collection.find(query_number)):
+        resp.message("You are in the system")
+        
+    else:
+        response_message = 'Hello {}, You said: {}'.format(number, message_body)
+        resp.message(response_message)
+        
+
     #make a call to the database and see if number is already in system 
     #if in database
         #check what they are messaging about 
 
-    #if not in database
-    number = request.form['From']
-    message_body = request.form['Body']
-    resp = MessagingResponse()
-    response_message = 'Hello {}, You said: {}'.format(number, message_body)
-    resp.message(response_message)
-
+    #if not in database - engage in initial message 
+    verse_collection.insert_one({'phone_number': number, 'name': message_body})
    
-    verse_collection.insert_one({'text': "yo", 'complete': 'yes'})
-
-    
-    
-
-
 
     #if number is not in the system - send the intro message
     # else if(None):
@@ -90,9 +96,6 @@ def sms_reply():
     # if STOP - stop sending messages 
     # user_setup = setup.Setup_User("Jacob", "2")
     
-
-    
-
     return str(resp)
 
     
