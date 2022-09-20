@@ -66,7 +66,7 @@ def sms_reply():
     #handle initial incoming message 
     #if(request.method == 'POST')
     
-    if(verse_collection.find({"phone_number": number}).count() == 0): #user is not in system yet and we need to add their number
+    if(verse_collection.count_documents({"phone_number": number}) == 0): #user is not in system yet and we need to add their number
         verse_collection.insert_one({'phone_number': number, 'name': message_body})
         response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
         resp.message(response_message)
