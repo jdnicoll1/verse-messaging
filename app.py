@@ -45,8 +45,8 @@ def send_verse():
 
     message = client.messages.create(
         from_=messaging_service_sid,
-        to='+13092654472',
-        body= list(verse_dict)[verse_num] + ": " + list(verse_dict.values())[verse_num],
+        to='+13092654472', #need a list of all users signed up to recieve service
+        body= list(verse_dict)[verse_num] + ": " + list(verse_dict.values())[verse_num], #will come from specific verse in database for a user
         # schedule_type='fixed',
         # send_at=send_when.isoformat() + 'Z',
     )
@@ -66,27 +66,38 @@ def sms_reply():
     #handle initial incoming message 
     #if(request.method == 'POST')
     
-    if(verse_collection.count_documents({"phone_number": number}) == 0): #user is not in system yet and we need to add their number
-        verse_collection.insert_one({'phone_number': number, 'name': message_body})
-        response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
+    
+    is_user_in_system = verse_collection.count_documents({"phone_number": number}) #check if user number is in system
+
+    #initial message without signing up
+    if(is_user_in_system == 0): #user is not in system yet and we need to add their number
+        verse_collection.insert_one({'phone_number': number, 'name': message_body}) #add user to the database
+        response_message = 'Yo yo welcome to The Message!\n\nPhilippians 4:8 says that: "Finally, brothers and sisters, whatever is true, whatever is noble, whatever is right, whatever is pure, whatever is lovely, whatever is admirable — if anything is excellent or praiseworthy—think about such things."\n\nIt is for this reason that this app was created... to learn more about God\'s Word and help set our thoughts on it consistently.\n\nBy signing up for the service you will recieve a message every two hours, with the idea of reorienting our thoughts to God\'s Word throughout the day. The verse will change every week or you can choose one yourself by texting MENU , which also has other options as well. Enjoy!!'
         resp.message(response_message)
-        
+
     else: #user is already in system 
-        resp.message("You are already in the system")
+        resp.message("User already in the system")
         
-        
+        #parse what the user sent
+        # if(message_body == "MENU"):
+            #display menu and any stored options that user might have
+        # elif(message_body == "STOP")
+            #remove user from database
+        # elif(message_body == "1")
+            #menu 1
+        # elif(message_body == "2")
+            #menu 2
 
-    #make a call to the database and see if number is already in system 
-    #if in database
-        #check what they are messaging about 
+        #handle all numbers for menu
 
-    #if not in database - engage in initial message 
+    
+    
+    #response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
+
     
    
 
-    #if number is not in the system - send the intro message
-    # else if(None):
-    #     response_message = ('Welcome to The Message!! To sign up send a text with your name')
+
 
     #if user is in system, read what the message is 
 
@@ -96,7 +107,6 @@ def sms_reply():
     #if verse_response - determine if we sent a verse and if it matches the response 
 
     # if STOP - stop sending messages 
-    # user_setup = setup.Setup_User("Jacob", "2")
     
     return str(resp)
 
