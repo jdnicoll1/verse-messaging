@@ -65,13 +65,15 @@ def sms_reply():
     
     #handle initial incoming message 
     #if(request.method == 'POST')
-    query_number = {"phone_number": number}
-    if(verse_collection.find(query_number)):
-        resp.message("You are in the system")
-        
-    else:
-        response_message = 'Hello {}, You said: {}'.format(number, message_body)
+    
+    if(verse_collection.find({"phone_number": number}).count() == 0): #user is not in system yet and we need to add their number
+        verse_collection.insert_one({'phone_number': number, 'name': message_body})
+        response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
         resp.message(response_message)
+        
+    else: #user is already in system 
+        resp.message("You are already in the system")
+        
         
 
     #make a call to the database and see if number is already in system 
@@ -79,7 +81,7 @@ def sms_reply():
         #check what they are messaging about 
 
     #if not in database - engage in initial message 
-    verse_collection.insert_one({'phone_number': number, 'name': message_body})
+    
    
 
     #if number is not in the system - send the intro message
