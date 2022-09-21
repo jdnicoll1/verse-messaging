@@ -67,16 +67,16 @@ def sms_reply():
     if(verse_collection.count_documents({"phone_number": number}) == 0): #user is not in system yet and we need to add their number
         verse_collection.insert_one({'phone_number': number, 'name': message_body, 'verses': {"John 11:35" : "Jesus wept.", "test_verse": "ya boi"}}) #add user to the database
         response_message = 'Welcome to The Message!\n\nPaul says in Philippians 4:8: "Finally, brothers and sisters, whatever is true, whatever is noble, whatever is right, whatever is pure, whatever is lovely, whatever is admirable — if anything is excellent or praiseworthy—think about such things."\n\nIt is for this reason that this app was created... to learn more about God\'s Word and help set our thoughts on it consistently.\n\nBy signing up for the service you will receive a message every three hours. The verse will change every week or you can choose one yourself by texting MENU , which also has other options as well. Enjoy!!'
-        resp.message(response_message)
+        
 
     else: #user is already in system 
         #parse what the user sent
         if(message_body == "MENU"):
             response_message = print_menu()
-            resp.message(response_message)
+            
         elif(message_body == "STOP"):
             response_message = "You will no longer receive any messages, to resume your account type START"
-            resp.message(response_message)
+            
         elif(message_body == "1"):
             doc = verse_collection.find_one({"phone_number" : number})
             obj = doc["verses"]
@@ -84,13 +84,13 @@ def sms_reply():
             for x in obj:
                 format_verse = x + ": " + obj[x] + "\n\n"
                 response_message += format_verse
-                resp.message(response_message)
+            
 
             
             
         
     #response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
-    
+    resp.message(response_message)
     return str(resp)
 
     
