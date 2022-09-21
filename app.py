@@ -82,9 +82,9 @@ def sms_reply():
             obj = doc["verses"]
             response_message = ""
             for x in obj:
-                thing = x + ": " + obj[x] + "\n\n"
-                response_message += thing
-                print(thing)
+                format_verse = x + ": " + obj[x] + "\n\n"
+                response_message += format_verse
+                resp.message(response_message)
 
             
             
