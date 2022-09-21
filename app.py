@@ -79,9 +79,13 @@ def sms_reply():
             resp.message(response_message)
         elif(message_body == "1"):
             doc = verse_collection.find_one({"phone_number" : number})
-            print(doc["verses"])
-            for x in doc["verses"]:
-                print(x)
+            obj = doc["verses"]
+            response_message = ""
+            for x in obj:
+                thing = x + ": " + obj[x] + "\n\n"
+                response_message += thing
+                print(thing)
+
             
             
         
