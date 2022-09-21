@@ -78,8 +78,8 @@ def sms_reply():
             response_message = "You will no longer receive any messages, to resume your account type START"
             resp.message(response_message)
         elif(message_body == "1"):
-            doc = verse_collection.find({"phone_number" : number})
-            print(doc["verses"])
+            doc = verse_collection.find_one({"phone_number" : number})
+            print(doc)
             
         
     #response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
