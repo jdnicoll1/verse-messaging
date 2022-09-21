@@ -63,15 +63,10 @@ def sms_reply():
     message_body = request.form['Body']
     resp = MessagingResponse()
     
-    #handle initial incoming message 
-    #if(request.method == 'POST')
-    
-
-
     #initial message without signing up
     if(verse_collection.count_documents({"phone_number": number}) == 0): #user is not in system yet and we need to add their number
-        verse_collection.insert_one({'phone_number': number, 'name': message_body}) #add user to the database
-        response_message = 'Welcome to The Message!\n\nIn Philippians 4:8 Paul says: "Finally, brothers and sisters, whatever is true, whatever is noble, whatever is right, whatever is pure, whatever is lovely, whatever is admirable — if anything is excellent or praiseworthy—think about such things."\n\nIt is for this reason that this app was created... to learn more about God\'s Word and help set our thoughts on it consistently.\n\nBy signing up for the service you will receive a message every two hours, with the idea of reorienting our thoughts to God\'s Word throughout the day. The verse will change every week or you can choose one yourself by texting MENU , which also has other options as well. Enjoy!!'
+        verse_collection.insert_one({'phone_number': number, 'name': message_body, 'verses': {"John 11:35" : "Jesus wept.", "test_verse": "ya boi"}}) #add user to the database
+        response_message = 'Welcome to The Message!\n\nIn Philippians 4:8 Paul says: "Finally, brothers and sisters, whatever is true, whatever is noble, whatever is right, whatever is pure, whatever is lovely, whatever is admirable — if anything is excellent or praiseworthy—think about such things."\n\nIt is for this reason that this app was created... to learn more about God\'s Word and help set our thoughts on it consistently.\n\nBy signing up for the service you will receive a message every three hours. The verse will change every week or you can choose one yourself by texting MENU , which also has other options as well. Enjoy!!'
         resp.message(response_message)
 
     else: #user is already in system 
@@ -79,20 +74,14 @@ def sms_reply():
         if(message_body == "MENU"):
             response_message = print_menu()
             resp.message(response_message)
-        # elif(message_body == "STOP")
-            #remove user from database
-        # elif(message_body == "1")
-            #menu 1
-        # elif(message_body == "2")
-            #menu 2
-        # display menu and any stored options that user might have
-
-        #handle all numbers for menu
+        elif(message_body == "STOP"):
+            response_message = "You will no longer receive any messages, to resume your account type START"
+            resp.message(response_message)
+        elif(message_body == "1"):
+            verse_collection.find({"phone_number" : number}, {"verses": 1})
+            
         
     #response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
-
-        
-    #if verse_response - determine if we sent a verse and if it matches the response 
     
     return str(resp)
 
