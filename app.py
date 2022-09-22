@@ -22,34 +22,45 @@ verse_collection = mongo.db.messaging
 
 
 
-@sched.scheduled_job('interval', hours=2)
+@sched.scheduled_job('interval', minutes=2)
 def send_verse():
-    verse_dict = {"2 Corinthians 5:21" : "For our sake he made him to be sin who knew no sin, so that in him we might become the righteousness of God", 
-                "1 Thessalonians 5:16-18" : "Rejoice always, pray without ceasing, give thanks in all circumstances; for this is the will of God in Christ Jesus for you.", 
-                "1 Peter 1:13" : "Therefore, preparing your minds for action, and being sober-minded, set your hope fully on the grace that will be brought to you at the revelation of Jesus Christ.", 
-                "Ezekiel 36:26" : "And I will give you a new heart, and a new spirit I will put within you. And I will remove the heart of stone from your flesh and give you a heart of flesh.",
-                "Proverbs 3:5-6" : "Trust in the LORD with all your heart, And lean not on your own understanding; In all your ways acknowledge Him, And He shall direct your paths.",
-                "Mark 10:45" : "For even the Son of Man did not come to be served, but to serve, and to give His life a ransom for many.",
-                "Romans 8:32" : "He who did not spare His own Son, but delivered Him up for us all, how shall He not with Him also freely give us all things?"
-    }
 
+    #twilio init
     account_sid = os.environ['TWILIO_ACCOUNT_SID']
     auth_token = os.environ['TWILIO_AUTH_TOKEN']
     messaging_service_sid = os.environ['TWILIO_MESSAGING_SERVICE_SID']
 
-   
+    client = Client(account_sid, auth_token)
+
+    #get phone number from database 
+    #get daily verse
+    #made sure it is on the text chain 
+    #send verse
+
+    #doc = {{number: +1111, daily_verse = "hello world"}, {number: na, daily_verse = lakdfjlka}}
+
+    #to find do cursor.toArray(), for x in len(array)
+    cursor = verse_collection.find({}, {"phone_number":1, "_id":0})
+    docs = cursor.toArray()
+    #doc = verse_collection.find_one({"phone_number" : number})
+    format_verse = ""
+    for user_profile in docs: 
+        obj = user_profile["daily_verse"]
+        for x in obj:
+            format_verse = x + ": " + obj[x]
+        
+        if(user_profile["on_text_chain"] == True):
+            user_number = user_profile["phone_number"]
+            message = client.messages.create(
+                from_=messaging_service_sid,
+                to=user_number, #need a list of all users signed up to recieve service
+                body= format_verse
+                # schedule_type='fixed',
+                # send_at=send_when.isoformat() + 'Z',
+            )
     
 
-    client = Client(account_sid, auth_token)
-    verse_num = 2
 
-    message = client.messages.create(
-        from_=messaging_service_sid,
-        to='+13092654472', #need a list of all users signed up to recieve service
-        body= list(verse_dict)[verse_num] + ": " + list(verse_dict.values())[verse_num], #will come from specific verse in database for a user
-        # schedule_type='fixed',
-        # send_at=send_when.isoformat() + 'Z',
-    )
 
     print(message.sid)
 
@@ -63,9 +74,10 @@ def sms_reply():
     message_body = request.form['Body']
     resp = MessagingResponse()
     
-    #initial message without signing up
+    #initial message when signing up
+    verse_init = {{"1 Thessalonians 5:16-18" : "Rejoice always, pray without ceasing, give thanks in all circumstances; for this is the will of God in Christ Jesus for you."}}
     if(verse_collection.count_documents({"phone_number": number}) == 0): #user is not in system yet and we need to add their number
-        verse_collection.insert_one({'phone_number': number, 'name': message_body, 'verses': {"John 11:35" : "Jesus wept.", "test_verse": "ya boi"}}) #add user to the database
+        verse_collection.insert_one({'phone_number': number, 'name': message_body, 'daily_verse': verse_init, 'verses': verse_init, 'on_text_chain': True}) #add user to the database
         response_message = 'Welcome to The Message!\n\nPaul says in Philippians 4:8: "Finally, brothers and sisters, whatever is true, whatever is noble, whatever is right, whatever is pure, whatever is lovely, whatever is admirable — if anything is excellent or praiseworthy—think about such things."\n\nIt is for this reason that this app was created... to learn more about God\'s Word and help set our thoughts on it consistently.\n\nBy signing up for the service you will receive a message every three hours. The verse will change every week or you can choose one yourself by texting MENU , which also has other options as well. Enjoy!!'
         
 
@@ -84,6 +96,11 @@ def sms_reply():
             for x in obj:
                 format_verse = x + ": " + obj[x] + "\n\n"
                 response_message += format_verse
+        elif(message_body == "2"):
+            response_message = "Stats still being constructed"
+        elif(message_body == "3"):
+            response_message = "Option to add verse from admin to verses"
+        
             
 
             
