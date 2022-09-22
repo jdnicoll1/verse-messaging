@@ -40,16 +40,15 @@ def send_verse():
     #doc = {{number: +1111, daily_verse = "hello world"}, {number: na, daily_verse = lakdfjlka}}
 
     #to find do cursor.toArray(), for x in len(array)
-    cursor = verse_collection.find({}, {"phone_number":1, "_id":0})
-    docs = cursor.toArray()
+    docs = verse_collection.find()
     #doc = verse_collection.find_one({"phone_number" : number})
     format_verse = ""
     for user_profile in docs: 
-        obj = user_profile["daily_verse"]
-        for x in obj:
-            format_verse = x + ": " + obj[x]
-        
         if(user_profile["on_text_chain"] == True):
+            #send daily verse to users on text chain
+            obj = user_profile["daily_verse"]
+            for x in obj:
+                format_verse = x + ": " + obj[x]
             user_number = user_profile["phone_number"]
             message = client.messages.create(
                 from_=messaging_service_sid,
