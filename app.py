@@ -22,7 +22,7 @@ verse_collection = mongo.db.messaging
 
 
 
-@sched.scheduled_job('cron', hour=(9,12,15,16,18,21))
+@sched.scheduled_job('interval', hours=3)
 def send_verse():
 
     #twilio init
