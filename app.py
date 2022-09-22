@@ -22,26 +22,17 @@ verse_collection = mongo.db.messaging
 
 
 
-@sched.scheduled_job('interval', minutes=2)
+@sched.scheduled_job('cron', hour=(9,12,15,16,18,21))
 def send_verse():
 
     #twilio init
     account_sid = os.environ['TWILIO_ACCOUNT_SID']
     auth_token = os.environ['TWILIO_AUTH_TOKEN']
     messaging_service_sid = os.environ['TWILIO_MESSAGING_SERVICE_SID']
-
     client = Client(account_sid, auth_token)
 
-    #get phone number from database 
-    #get daily verse
-    #made sure it is on the text chain 
-    #send verse
-
-    #doc = {{number: +1111, daily_verse = "hello world"}, {number: na, daily_verse = lakdfjlka}}
-
-    #to find do cursor.toArray(), for x in len(array)
+    #get all numbers that want daily texts and send them their current daily text verse
     docs = verse_collection.find()
-    #doc = verse_collection.find_one({"phone_number" : number})
     format_verse = ""
     for user_profile in docs: 
         if(user_profile["on_text_chain"] == True):
@@ -58,9 +49,6 @@ def send_verse():
                 # send_at=send_when.isoformat() + 'Z',
             )
     
-
-
-
     print(message.sid)
 
 
