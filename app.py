@@ -84,7 +84,7 @@ def sms_reply():
         elif(message_body == "3"):
             
             admin_doc = verse_collection.find_one({"name": "admin"})
-            user_doc = verse_collection.find_one({"number": number})
+            user_doc = verse_collection.find_one({"phone_number": number})
             admin_obj = admin_doc["verses"] #get all verses in database
             user_obj = user_doc["verses"] #get verses specific user has
             print(admin_obj)
