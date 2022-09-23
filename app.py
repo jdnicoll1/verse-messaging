@@ -90,12 +90,12 @@ def sms_reply():
             #go through all available verses, the first one that isn't in the user verses we add
             for admin_verse in admin_obj: 
                 verse_reference, verse_content = admin_verse, admin_obj[admin_verse] 
-                if(verse_reference in user_obj and verse_content == user_obj[verse_reference]):
-                    continue #verse is already in user verses so we don't need to append it again
-                else:
-                    verse_collection.update_one({"phone_number": number}, {"$push": {"verses": {admin_verse: admin_obj[admin_verse]}}})
-                    response_message = "{} added to my verses".format(admin_verse)
-                    break #once we have added a verse we only need one
+                for verse_obj in user_obj:
+                    if(verse_reference not in verse_obj):
+                        verse_collection.update_one({"phone_number": number}, {"$push": {"verses": {admin_verse: admin_obj[admin_verse]}}})
+                        response_message = "{} added to my verses".format(admin_verse)
+                        break #once we have added a verse we only need one
+                    
 
 #update daily verse 
 #db.collection.update(  { _id:...} , { $set: { some_key.param2 : new_info  } } 
