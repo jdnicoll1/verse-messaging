@@ -77,6 +77,9 @@ def sms_reply():
             obj = doc["verses"]
             response_message = ""
             for x in obj:
+                print(x)
+                print(obj[x])
+                print(obj[obj[x]])
                 format_verse = x + ": " + obj[x] + "\n\n"
                 response_message += format_verse
         elif(message_body == "2"):
@@ -97,6 +100,7 @@ def sms_reply():
                 else:
                     verse_collection.update_one({"phone_number": number}, {"$push": {"verses": {admin_verse: admin_obj[admin_verse]}}})
                     response_message = "{} added to my verses".format(admin_verse)
+                    break #once we have added a verse we only need one
 
 #update daily verse 
 #db.collection.update(  { _id:...} , { $set: { some_key.param2 : new_info  } } 
