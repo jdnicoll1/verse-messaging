@@ -95,6 +95,9 @@ def sms_reply():
                         verse_collection.update_one({"phone_number": number}, {"$push": {"verses": {admin_verse: admin_obj[admin_verse]}}})
                         response_message = "{} added to my verses".format(admin_verse)
                         break #once we have added a verse we only need one
+                    else:
+                        continue
+                break
                     
 
 #update daily verse 
