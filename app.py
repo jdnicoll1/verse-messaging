@@ -82,18 +82,23 @@ def sms_reply():
         elif(message_body == "2"):
             response_message = "Stats still being constructed"
         elif(message_body == "3"):
-            response_message = "Option to add verse from admin to verses"
+            
             admin_doc = verse_collection.find_one({"name": "admin"})
             user_doc = verse_collection.find_one({"number": number})
             admin_obj = admin_doc["verses"] #get all verses in database
             user_obj = user_doc["verses"] #get verses specific user has
+            print(admin_obj)
+            print(user_obj)
+            print("here")
             #go through all available verses, the first one that isn't in the user verses we add
             for admin_verse in admin_obj: 
+                print("here2")
                 verse_reference, verse_content = admin_verse, admin_obj[admin_verse] 
                 if(verse_reference in user_obj and verse_content == user_obj[verse_reference]):
                     continue #verse is already in user verses so we don't need to append it again
                 else:
                     verse_collection.update_one({"phone_number": number}, {"$push": {verse_reference, verse_content}})
+                    response_message = verse_reference + " added to My Verses"
 
 
 
