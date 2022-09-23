@@ -97,8 +97,8 @@ def sms_reply():
                 if(verse_reference in user_obj and verse_content == user_obj[verse_reference]):
                     continue #verse is already in user verses so we don't need to append it again
                 else:
-                    verse_collection.update_one({"phone_number": number}, {"$push": {verse_reference, verse_content}})
-                    response_message = verse_reference + " added to My Verses"
+                    verse_collection.update_one({"phone_number": number}, {"$push": {"verses": {admin_verse: admin_obj[admin_verse]}}})
+                    response_message = "{} added to my verses".format(admin_verse)
 
 
 
