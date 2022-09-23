@@ -76,22 +76,17 @@ def sms_reply():
             doc = verse_collection.find_one({"phone_number" : number})
             obj = doc["verses"]
             response_message = ""
-            for x in obj:
-                print(x)
-                print(obj[x])
-                print(obj[obj[x]])
-                format_verse = x + ": " + obj[x] + "\n\n"
-                response_message += format_verse
+            for verse_pair in obj:
+                for x in verse_pair:
+                    format_verse = x + ": " + verse_pair[x] + "\n\n"
+                    response_message += format_verse
         elif(message_body == "2"):
             response_message = "Stats still being constructed"
         elif(message_body == "3"):
-            
             admin_doc = verse_collection.find_one({"name": "admin"})
             user_doc = verse_collection.find_one({"phone_number": number})
             admin_obj = admin_doc["verses"] #get all verses in database
             user_obj = user_doc["verses"] #get verses specific user has
-            print(admin_obj)
-            print(user_obj)
             #go through all available verses, the first one that isn't in the user verses we add
             for admin_verse in admin_obj: 
                 verse_reference, verse_content = admin_verse, admin_obj[admin_verse] 
