@@ -62,7 +62,7 @@ def sms_reply():
     #initial message when signing up
     verse_init = {"1 Thessalonians 5:16-18" : "Rejoice always, pray without ceasing, give thanks in all circumstances; for this is the will of God in Christ Jesus for you."}
     if(verse_collection.count_documents({"phone_number": number}) == 0): #user is not in system yet and we need to add their number
-        verse_collection.insert_one({'phone_number': number, 'name': message_body, 'daily_verse': verse_init, 'verses': [verse_init], 'on_text_chain': True}) #add user to the database
+        verse_collection.insert_one({'phone_number': number, 'name': message_body, 'daily_verse': verse_init, 'verses': verse_init, 'on_text_chain': True}) #add user to the database
         response_message = 'Welcome to The Message!\n\nPaul says in Philippians 4:8: "Finally, brothers and sisters, whatever is true, whatever is noble, whatever is right, whatever is pure, whatever is lovely, whatever is admirable — if anything is excellent or praiseworthy—think about such things."\n\nIt is for this reason that this app was created... to learn more about God\'s Word and help set our thoughts on it consistently.\n\nBy signing up for the service you will receive a message every three hours. The verse will change every week or you can choose one yourself by texting MENU , which also has other options as well. Enjoy!!'
         
 
@@ -76,10 +76,9 @@ def sms_reply():
             doc = verse_collection.find_one({"phone_number" : number})
             obj = doc["verses"]
             response_message = ""
-            for verse_pair in obj:
-                for x in verse_pair:
-                    format_verse = x + ": " + verse_pair[x] + "\n\n"
-                    response_message += format_verse
+            for x in obj:
+                format_verse = x + ": " + obj[x] + "\n\n"
+                response_message += format_verse
         elif(message_body == "2"):
             response_message = "Stats still being constructed"
         elif(message_body == "3"):
@@ -87,17 +86,15 @@ def sms_reply():
             user_doc = verse_collection.find_one({"phone_number": number})
             admin_obj = admin_doc["verses"] #get all verses in database
             user_obj = user_doc["verses"] #get verses specific user has
-            #go through all available verses, the first one that isn't in the user verses we add
-            for admin_verse in admin_obj: 
-                verse_reference, verse_content = admin_verse, admin_obj[admin_verse] 
-                for verse_obj in user_obj:
-                    if(verse_reference not in verse_obj):
-                        verse_collection.update_one({"phone_number": number}, {"$push": {"verses": {admin_verse: admin_obj[admin_verse]}}})
-                        response_message = "{} added to my verses".format(admin_verse)
-                        break #once we have added a verse we only need one
-                    else:
-                        continue
-                break
+            #go through all available verses, the first one that isn't in the user verses we add 
+            for admin_verse_reference in admin_obj: 
+                if(admin_verse_reference not in user_obj):
+                    user_obj[admin_verse_reference] = admin_obj[admin_verse_reference]
+                    verse_collection.update_one({"phone_number": number}, {"$set": {"verses": user_obj}})
+                    response_message = "{} added to my verses".format(admin_verse_reference)
+                    break
+
+                
                     
 
 #update daily verse 
