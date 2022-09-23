@@ -3,16 +3,14 @@ from twilio.rest import Client
 import os
 from twilio.twiml.messaging_response import MessagingResponse
 from apscheduler.schedulers.blocking import BlockingScheduler
-
 from flask_pymongo import PyMongo
-
 from menu import *
 
 #initialize flask application
 app = Flask(__name__)
 
 #initialize scheduler for periodic texts
-sched = BlockingScheduler()
+sched = BlockingScheduler(timezone="America/Chicago")
 
 #initialize database
 app.config['MONGO_URI'] = os.environ['MONGO_URI']
@@ -22,7 +20,7 @@ verse_collection = mongo.db.messaging
 
 
 
-@sched.scheduled_job('cron', hour='9,12,15,18,21,23')
+@sched.scheduled_job('cron', hour='9,12,15,18,21')
 def send_verse():
 
     #twilio init
@@ -72,10 +70,8 @@ def sms_reply():
         #parse what the user sent
         if(message_body == "MENU"):
             response_message = print_menu()
-            
         elif(message_body == "STOP"):
-            response_message = "You will no longer receive any messages, to resume your account type START"
-            
+            response_message = "You will no longer receive any messages, to resume your account type START" 
         elif(message_body == "1"):
             doc = verse_collection.find_one({"phone_number" : number})
             obj = doc["verses"]
@@ -87,11 +83,24 @@ def sms_reply():
             response_message = "Stats still being constructed"
         elif(message_body == "3"):
             response_message = "Option to add verse from admin to verses"
-        
-            
+            admin_doc = verse_collection.find_one({"name": "admin"})
+            user_doc = verse_collection.find_one({"number": number})
+            admin_obj = admin_doc["verses"] #get all verses in database
+            user_obj = user_doc["verses"] #get verses specific user has
+            #go through all available verses, the first one that isn't in the user verses we add
+            for admin_verse in admin_obj: 
+                verse_reference, verse_content = admin_verse, admin_obj[admin_verse] 
+                if(verse_reference in user_obj and verse_content == user_obj[verse_reference]):
+                    continue #verse is already in user verses so we don't need to append it again
+                else:
+                    verse_collection.update_one({"phone_number": number}, {"$push": {verse_reference, verse_content}})
+
+
+
+                
 
             
-            
+        
         
     #response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
     resp.message(response_message)
