@@ -67,16 +67,15 @@ def sms_reply():
         #parse what the user sent
         #check to see if incoming message is new verse - we will know this by whether or not an equals sign is present 
         split_verse = message_body.split('=')
+        message_body.strip() #get rid of any uninteded whitespace
         if(len(split_verse) == 2):
             user_doc = verse_collection.find_one({"phone_number": number})
             user_obj = user_doc["verses"] #get verses specific user has
-            user_obj[split_verse[0]] = split_verse[1]
+            user_obj[split_verse[0].strip()] = split_verse[1].strip()
             verse_collection.update_one({"phone_number": number}, {"$set": {"verses": user_obj}})
             response_message = "{} added to my verses".format(split_verse[0])
-
-        if(message_body == "MENU"):
+        elif(message_body == "MENU"):
             response_message = print_menu()
-            verse_collection.update_one({"phone_number": number}, {"$set": {"adding_custom_verse": False}})
         elif(message_body == "STOP"):
             verse_collection.update_one({"phone_number": number}, {"$set": {"on_text_chain": False}})
             response_message = "You will no longer receive any messages, to resume your account type START" 
@@ -86,7 +85,6 @@ def sms_reply():
         elif(message_body == "1"):
             doc = verse_collection.find_one({"phone_number" : number})
             obj = doc["verses"]
-            response_message = ""
             for x in obj:
                 format_verse = x + ": " + obj[x] + "\n\n"
                 response_message += format_verse
