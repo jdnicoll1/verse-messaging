@@ -99,9 +99,7 @@ def sms_reply():
             for x in obj:
                 format_verse = x + ": " + obj[x] + "\n\n"
                 response_message += format_verse
-        elif(message_body == "2"):
-            response_message = "Stats still being constructed"
-        elif(message_body == "3"):
+        elif(message_body == "2"): #add random verse
             admin_doc = verse_collection.find_one({"name": "admin"})
             user_doc = verse_collection.find_one({"phone_number": number})
             admin_obj = admin_doc["verses"] #get all verses in database
@@ -113,9 +111,9 @@ def sms_reply():
                     verse_collection.update_one({"phone_number": number}, {"$set": {"verses": user_obj}})
                     response_message = "{} added to my verses".format(admin_verse_reference)
                     break
-        elif(message_body == "4"):
+        elif(message_body == "3"): #add custom verse
             response_message = "To add a custom verse, send a text with the verse reference and the verse content separated by an equals sign. For example:\n\nJohn 11:35 = Jesus Wept."
-        elif(message_body == "5"): 
+        elif(message_body == "4"): #set daily verse
             response_message = 'To set a daily verse, send a text with the words "Daily Verse" followed by an equals sign and the verse reference.\n*Note that verse must already be added to My Verses. Example:\n\nDaily Verse = John 3:16'
         else:
             response_message = "Couldn't understand request, please try again"
