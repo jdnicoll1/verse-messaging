@@ -69,11 +69,18 @@ def sms_reply():
         split_verse = message_body.split('=')
         message_body.strip() #get rid of any uninteded whitespace
         if(len(split_verse) == 2):
-            user_doc = verse_collection.find_one({"phone_number": number})
-            user_obj = user_doc["verses"] #get verses specific user has
-            user_obj[split_verse[0].strip()] = split_verse[1].strip()
-            verse_collection.update_one({"phone_number": number}, {"$set": {"verses": user_obj}})
-            response_message = "{} added to my verses".format(split_verse[0])
+            if(split_verse[0].strip() == "Daily Verse"): #setting daily verse
+                user_doc = verse_collection.find_one({"phone_number": number})
+                user_obj = user_doc["verses"] #get verses specific user has
+                verse_content = user_obj[split_verse[1].strip()]
+                verse_collection.update_one({"phone_number": number}, {"$set": {"daily_verse": {split_verse[1].strip() : verse_content}}})
+                response_message = "{} set as daily verse".format(split_verse[1])
+            else: #setting custom verse
+                user_doc = verse_collection.find_one({"phone_number": number}) 
+                user_obj = user_doc["verses"] #get verses specific user has
+                user_obj[split_verse[0].strip()] = split_verse[1].strip()
+                verse_collection.update_one({"phone_number": number}, {"$set": {"verses": user_obj}})
+                response_message = "{} added to my verses".format(split_verse[0])
         elif(message_body == "MENU"):
             response_message = print_menu()
         elif(message_body == "STOP"):
@@ -105,9 +112,8 @@ def sms_reply():
                     break
         elif(message_body == "4"):
             response_message = "To add a custom verse, send a text with the verse reference and the verse content separated by an equals sign. For example:\n\nJohn 11:35 = Jesus Wept."
-            #need to check if front part of text is a book in the Bible, if it is, then it will be a custom verse
-            #split string on equals at this point
-            #put a new verse in user's verses
+        elif(message_body == "5"): 
+            response_message = 'To set a daily verse, send a text with the words "Daily Verse" followed by an equals sign and the verse reference.\n*Note that verse must already be added to My Verses. Example:\n\nDaily Verse = John 3:16'
         else:
             response_message = "Couldn't understand request, please try again"
 
