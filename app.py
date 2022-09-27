@@ -72,9 +72,12 @@ def sms_reply():
             if(split_verse[0].strip() == "Daily Verse"): #setting daily verse
                 user_doc = verse_collection.find_one({"phone_number": number})
                 user_obj = user_doc["verses"] #get verses specific user has
-                verse_content = user_obj[split_verse[1].strip()]
-                verse_collection.update_one({"phone_number": number}, {"$set": {"daily_verse": {split_verse[1].strip() : verse_content}}})
-                response_message = "{} set as daily verse".format(split_verse[1])
+                try:
+                    verse_content = user_obj[split_verse[1].strip()] #will fail if verse is not in my verses, that is why there is a try/except
+                    verse_collection.update_one({"phone_number": number}, {"$set": {"daily_verse": {split_verse[1].strip() : verse_content}}})
+                    response_message = "{} set as daily verse".format(split_verse[1])
+                except:
+                    response_message = "Not able to set daily verse. Make sure verse is in My Verses and text looks like the following:\n\nDaily Verse = John 3:16"
             else: #setting custom verse
                 user_doc = verse_collection.find_one({"phone_number": number}) 
                 user_obj = user_doc["verses"] #get verses specific user has
