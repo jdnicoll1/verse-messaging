@@ -18,8 +18,6 @@ mongo = PyMongo(app)
 verse_collection = mongo.db.messaging
 
 
-
-
 @sched.scheduled_job('cron', hour='9,12,15,18,21')
 def send_verse():
 
@@ -43,8 +41,6 @@ def send_verse():
                 from_=messaging_service_sid,
                 to=user_number, #need a list of all users signed up to recieve service
                 body= format_verse
-                # schedule_type='fixed',
-                # send_at=send_when.isoformat() + 'Z',
             )
     
     print(message.sid)
@@ -62,7 +58,7 @@ def sms_reply():
     #initial message when signing up
     verse_init = {"1 Thessalonians 5:16-18" : "Rejoice always, pray without ceasing, give thanks in all circumstances; for this is the will of God in Christ Jesus for you."}
     if(verse_collection.count_documents({"phone_number": number}) == 0): #user is not in system yet and we need to add their number
-        verse_collection.insert_one({'phone_number': number, 'name': message_body, 'daily_verse': verse_init, 'verses': verse_init, 'on_text_chain': True}) #add user to the database
+        verse_collection.insert_one({'phone_number': number, 'name': message_body, 'daily_verse': verse_init, 'verses': verse_init, 'on_text_chain': True, 'adding_custom_verse': False}) #add user to the database
         response_message = 'Welcome to The Message!\n\nPaul says in Philippians 4:8: "Finally, brothers and sisters, whatever is true, whatever is noble, whatever is right, whatever is pure, whatever is lovely, whatever is admirable — if anything is excellent or praiseworthy—think about such things."\n\nIt is for this reason that this app was created... to learn more about God\'s Word and help set our thoughts on it consistently.\n\nBy signing up for the service you will receive a message every three hours. The verse will change every week or you can choose one yourself by texting MENU , which also has other options as well. Enjoy!!'
         
 
@@ -70,8 +66,13 @@ def sms_reply():
         #parse what the user sent
         if(message_body == "MENU"):
             response_message = print_menu()
+            verse_collection.update_one({"phone_number": number}, {"$set": {"adding_custom_verse": False}})
         elif(message_body == "STOP"):
+            verse_collection.update_one({"phone_number": number}, {"$set": {"on_text_chain": False}})
             response_message = "You will no longer receive any messages, to resume your account type START" 
+        elif(message_body == "START"):
+            verse_collection.update_one({"phone_number": number}, {"$set": {"on_text_chain": True}})
+            response_message = "Welcome back, type MENU to see options."
         elif(message_body == "1"):
             doc = verse_collection.find_one({"phone_number" : number})
             obj = doc["verses"]
@@ -93,20 +94,16 @@ def sms_reply():
                     verse_collection.update_one({"phone_number": number}, {"$set": {"verses": user_obj}})
                     response_message = "{} added to my verses".format(admin_verse_reference)
                     break
+        elif(message_body == "4"):
+            response_message = "To add a custom verse, send a text with the verse reference and the verse content separated by an equals sign. For example:\nJohn 11:35 = Jesus Wept."
+            verse_collection.update_one({"phone_number": number}, {"$set": {"adding_custom_verse": True}})
+            #need to check if front part of text is a book in the Bible, if it is, then it will be a custom verse
+            #split string on equals at this point
+            #put a new verse in user's verses
+        else:
+            response_message = "Couldn't understand request, please try again"
 
-                
-                    
 
-#update daily verse 
-#db.collection.update(  { _id:...} , { $set: { some_key.param2 : new_info  } } 
-
-
-
-                
-
-            
-        
-        
     #response_message = 'Hello {}, You said: {}'.format(number, message_body) #send intial response 
     resp.message(response_message)
     return str(resp)
